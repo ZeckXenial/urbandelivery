@@ -1,0 +1,89 @@
+auth
+id_auth
+id_usuario
+fecha_auth
+
+usuarios
+id_usuario
+nombre_usuario 
+apellido_usuario
+img_usuario -> url
+email_usuario -> unique
+fecha_registro - timestamp
+id_auth - true/false
+contrasena_usuario ->  encriptada
+rol_usuario - cliente, repartidor, vendedor
+
+negocios
+id_negocio
+direccion_negocio -> json {direccion, latitud, longitud}
+nombre_negocio
+img_negocio -> url
+telefono_negocio 
+
+vendedor
+id_vendedor
+nombre_vendedor
+id_negocio -> json {id_negocio[1,2,3]}
+img_vendedor -> url
+telefono_vendedor 
+
+valoracion_producto
+id_valoracion
+id_producto
+id_vendedor
+valoracion -> json {comentario, id_usuario, fecha_valoracion, 1 - 5 estrellas}
+
+repartidores
+id_repartidor
+nombre_repartidor
+img_repartidor -> url
+apellido_repartidor
+email_repartidor -> unique
+
+clientes
+id_cliente
+nombre_cliente
+apellido_cliente
+img_cliente -> url
+email_cliente -> unique
+2fa -> varchar encriptada
+
+pedidos
+id_pedido
+fecha_pedido
+estado_pedido -> json {estado, fecha_estado}
+2fa - varchar encriptada
+img_pedido -> url
+direccion_pedido -> json {direccion, latitud, longitud}
+id_cliente
+id_repartidor
+id_vendedor
+
+productos
+id_producto
+nombre_producto
+id_vendedor
+id_categoria
+img_producto -> url
+precio_producto
+stock_producto
+
+
+detalle_pedido
+id_pedido
+id_producto
+cantidad_producto
+
+universidades
+id_negocio
+nombre_universidad
+id_universidad
+direccion_universidad -> json {direccion, latitud, longitud}
+img_universidad -> url
+
+categorias
+id_categoria
+nombre_categoria
+img_categoria -> url
+id_producto
