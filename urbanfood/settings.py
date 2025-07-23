@@ -75,9 +75,9 @@ WSGI_APPLICATION = 'urbanfood.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'urbanfood_db',
+        'NAME': 'urbanfood',
         'USER': 'root',  # Cambia esto por tu usuario de MySQL
-        'PASSWORD': 'tu_contraseña',  # Cambia esto por tu contraseña de MySQL
+        'PASSWORD': '',  # Cambia esto por tu contraseña de MySQL
         'HOST': 'localhost',
         'PORT': '3306',
         'OPTIONS': {
