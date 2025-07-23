@@ -4,55 +4,9 @@ Django>=4.2,<5.0
 mysqlclient>=2.1.0  # Cliente MySQL para Python
 Pillow>=9.0
 django-crispy-forms>=1.14
+djangorestframework>=3.14.0  # Django REST Framework
+djangorestframework-simplejwt>=5.3.0  # Para autenticación JWT
+django-cors-headers>=4.3.0  # Para manejar CORS
+python-dotenv>=1.0.0  # Para manejar variables de entorno
 
 
-# CDNs para Frontend
-
-## CSS
-
-<link
-  rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css"
-  integrity="sha256‑p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-  crossorigin=""
-/>
-<script
-  src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"
-  integrity="sha256‑20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-  crossorigin=""
-></script>
-
-
-<!-- Bootstrap 5 CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-ENjdO4Dr2bkBIFxQpeoAzXjy1vFp4VrZYN5t9eZg5oj0ieGizqPLFornv+1bn6RZ"
-      crossorigin="anonymous">
-
-<!-- Font Awesome CSS -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-      rel="stylesheet"
-      integrity="sha512-pIVVuPRtVt1xMPSsE6eogH7/UTJvCJ+hGezAB1VCxsVJW2TV7C/sni83ZSfhWeRtWzPUes/a+jB1z5oP2+B1mQ=="
-      crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-<!-- DataTables CSS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/datatables.net-dt@1.13.4/css/jquery.dataTables.min.css" />
-
-## JavaScript
-<!-- jQuery -->
-<script
-  src="https://code.jquery.com/jquery-3.7.0.min.js"
-  integrity="sha256-3fpYzs3Gq9y6XUgn8Hw7u/H66E0iZ84Gy6aC9+KXtkI="
-  crossorigin="anonymous"></script>
-
-<!-- Bootstrap 5 JS Bundle (Popper incluido) -->
-<script
-  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
-  integrity="sha384-qQ2WFnGoYg2asmjvRtgZjUJ0sFDkzsbRi8L1pkGPvPuiQZVN4UHR+8ABl5X7FtgN"
-  crossorigin="anonymous"></script>
-
-<!-- DataTables JS -->
-<script src="https://cdn.jsdelivr.net/npm/datatables.net@1.13.4/js/jquery.dataTables.min.js"></script>
-
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>

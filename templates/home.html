@@ -1,0 +1,282 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Bienvenido a UrbanFood{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                    url('{% static 'img/hero-bg.jpg' %}');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        padding: 100px 0;
+        text-align: center;
+    }
+    
+    .feature-card {
+        border: none;
+        border-radius: 10px;
+        transition: transform 0.3s;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .feature-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: #0d6efd;
+    }
+    
+    .category-card {
+        position: relative;
+        overflow: hidden;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        height: 200px;
+    }
+    
+    .category-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s;
+    }
+    
+    .category-card:hover img {
+        transform: scale(1.05);
+    }
+    
+    .category-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 15px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section mb-5">
+    <div class="container">
+        <h1 class="display-4 fw-bold mb-4">Disfruta de la mejor comida en tu puerta</h1>
+        <p class="lead mb-4">Pide tus platillos favoritos de los mejores restaurantes de la ciudad</p>
+        
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <form class="row g-3">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="fas fa-search"></i></span>
+                            <input type="text" class="form-control form-control-lg" placeholder="¿Qué te apetece comer hoy?">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary btn-lg w-100">Buscar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="container mb-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold">¿Por qué elegirnos?</h2>
+        <p class="text-muted">Las mejores opciones para satisfacer tu antojo</p>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card h-100 p-4 text-center feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h4>Rápido</h4>
+                <p class="text-muted">Entrega rápida y segura en menos de 30 minutos</p>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100 p-4 text-center feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <h4>Variedad</h4>
+                <p class="text-muted">Múltiples opciones de restaurantes y platillos</p>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card h-100 p-4 text-center feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <h4>Soporte 24/7</h4>
+                <p class="text-muted">Atención al cliente disponible en todo momento</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="container mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Categorías Populares</h2>
+        <a href="#" class="btn btn-outline-primary">Ver todas</a>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-4">
+            <div class="category-card">
+                <img src="{% static 'img/pizza.jpg' %}" alt="Pizza">
+                <div class="category-overlay">
+                    <h5 class="mb-0">Pizza</h5>
+                    <small class="text-white-50">15 restaurantes</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="category-card">
+                <img src="{% static 'img/hamburguesa.jpg' %}" alt="Hamburguesas">
+                <div class="category-overlay">
+                    <h5 class="mb-0">Hamburguesas</h5>
+                    <small class="text-white-50">12 restaurantes</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="category-card">
+                <img src="{% static 'img/sushi.jpg' %}" alt="Sushi">
+                <div class="category-overlay">
+                    <h5 class="mb-0">Sushi</h5>
+                    <small class="text-white-50">8 restaurantes</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="bg-light py-5 mb-5">
+    <div class="container text-center">
+        <h2 class="fw-bold mb-4">¿Eres dueño de un restaurante?</h2>
+        <p class="lead mb-4">Únete a nuestra plataforma y llega a miles de clientes</p>
+        <a href="#" class="btn btn-primary btn-lg">Registrar Restaurante</a>
+    </div>
+</section>
+
+<!-- Popular Restaurants -->
+<section class="container mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0">Restaurantes Populares</h2>
+        <a href="#" class="btn btn-outline-primary">Ver todos</a>
+    </div>
+    
+    <div class="row" id="restaurantes-container">
+        <!-- Los restaurantes se cargarán aquí dinámicamente -->
+        <div class="col-12 text-center my-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-2">Cargando restaurantes...</p>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Cargar restaurantes mediante AJAX
+    document.addEventListener('DOMContentLoaded', function() {
+        // Simulamos una carga de datos (en producción, esto sería una llamada a la API)
+        setTimeout(function() {
+            const container = document.getElementById('restaurantes-container');
+            container.innerHTML = `
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <img src="{% static 'img/restaurante1.jpg' %}" class="card-img-top" alt="Restaurante 1" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h5 class="card-title mb-1">Pizza Palace</h5>
+                                    <p class="text-muted mb-2">Italiana • $$</p>
+                                </div>
+                                <span class="badge bg-success">4.5 <i class="fas fa-star"></i></span>
+                            </div>
+                            <p class="card-text">Las mejores pizzas artesanales de la ciudad.</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-motorcycle text-primary"></i> 20-30 min</span>
+                                <a href="#" class="btn btn-sm btn-outline-primary">Ver menú</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <img src="{% static 'img/restaurante2.jpg' %}" class="card-img-top" alt="Restaurante 2" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h5 class="card-title mb-1">Burger House</h5>
+                                    <p class="text-muted mb-2">Americana • $</p>
+                                </div>
+                                <span class="badge bg-success">4.7 <i class="fas fa-star"></i></span>
+                            </div>
+                            <p class="card-text">Hamburguesas jugosas con ingredientes frescos.</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-motorcycle text-primary"></i> 15-25 min</span>
+                                <a href="#" class="btn btn-sm btn-outline-primary">Ver menú</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <img src="{% static 'img/restaurante3.jpg' %}" class="card-img-top" alt="Restaurante 3" style="height: 200px; object-fit: cover;">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h5 class="card-title mb-1">Sushi Master</h5>
+                                    <p class="text-muted mb-2">Japonesa • $$$</p>
+                                </div>
+                                <span class="badge bg-success">4.9 <i class="fas fa-star"></i></span>
+                            </div>
+                            <p class="card-text">Auténtica cocina japonesa con ingredientes frescos.</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-motorcycle text-primary"></i> 30-45 min</span>
+                                <a href="#" class="btn btn-sm btn-outline-primary">Ver menú</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }, 1500);
+        
+        // Manejador para el formulario de búsqueda
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const query = this.querySelector('input[type="text"]').value;
+            if (query.trim()) {
+                // Aquí iría la lógica de búsqueda
+                alert(`Buscando: ${query}`);
+            }
+        });
+    });
+</script>
+{% endblock %}

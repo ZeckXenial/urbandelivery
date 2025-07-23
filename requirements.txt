@@ -1,0 +1,9 @@
+Django>=4.2.0,<5.0.0
+djangorestframework>=3.14.0
+djangorestframework-simplejwt>=5.2.2
+mysqlclient>=2.1.0
+Pillow>=9.0.0
+python-dotenv>=0.19.0
+crispy-bootstrap5>=2021.0.0
+django-crispy-forms>=1.14.0
+django-cors-headers>=3.13.0

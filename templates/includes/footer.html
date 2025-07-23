@@ -1,0 +1,58 @@
+<!-- Footer -->
+<footer class="bg-dark text-white mt-5">
+    <div class="container py-4">
+        <div class="row">
+            <div class="col-md-4 mb-4 mb-md-0">
+                <h5 class="text-uppercase mb-4">UrbanFood</h5>
+                <p>Tu plataforma de comida rápida favorita. Pide tus platillos preferidos y recíbelos en la puerta de tu casa.</p>
+                <div class="social-links">
+                    <a href="#" class="text-white me-2"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="text-white me-2"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-white me-2"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="text-white"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+            
+            <div class="col-md-2 mb-4 mb-md-0">
+                <h5 class="text-uppercase mb-4">Enlaces Rápidos</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="{% url 'home' %}" class="text-white">Inicio</a></li>
+                    <li class="mb-2"><a href="#" class="text-white">Acerca de Nosotros</a></li>
+                    <li class="mb-2"><a href="#" class="text-white">Restaurantes</a></li>
+                    <li class="mb-2"><a href="#" class="text-white">Contáctanos</a></li>
+                    <li><a href="#" class="text-white">Términos y Condiciones</a></li>
+                </ul>
+            </div>
+            
+            <div class="col-md-3 mb-4 mb-md-0">
+                <h5 class="text-uppercase mb-4">Horario de Atención</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2">Lunes a Viernes: 8:00 AM - 10:00 PM</li>
+                    <li class="mb-2">Sábados: 9:00 AM - 11:00 PM</li>
+                    <li>Domingos: 10:00 AM - 9:00 PM</li>
+                </ul>
+            </div>
+            
+            <div class="col-md-3">
+                <h5 class="text-uppercase mb-4">Contacto</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="fas fa-map-marker-alt me-2"></i> Ciudad, País</li>
+                    <li class="mb-2"><i class="fas fa-phone me-2"></i> +1 234 567 890</li>
+                    <li class="mb-2"><i class="fas fa-envelope me-2"></i> info@urbanfood.com</li>
+                    <li><i class="fas fa-headset me-2"></i> Soporte 24/7</li>
+                </ul>
+            </div>
+        </div>
+        
+        <hr class="my-4">
+        
+        <div class="row align-items-center">
+            <div class="col-md-6 text-center text-md-start">
+                <p class="mb-0">&copy; {% now "Y" %} UrbanFood. Todos los derechos reservados.</p>
+            </div>
+            <div class="col-md-6 text-center text-md-end">
+                <img src="{% static 'img/payment-methods.png' %}" alt="Métodos de pago" class="img-fluid" style="max-height: 30px;">
+            </div>
+        </div>
+    </div>
+</footer>
