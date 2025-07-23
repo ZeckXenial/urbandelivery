@@ -29,8 +29,8 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
-# Custom user model
-AUTH_USER_MODEL = 'usuarios.Usuario'
+# Custom user model - using default Django User model
+# AUTH_USER_MODEL = 'usuarios.Usuario'  # Comentado temporalmente
 
 # JWT Authentication settings
 SIMPLE_JWT = {

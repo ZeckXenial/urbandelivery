@@ -2,15 +2,20 @@ from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth.models import User
+from django.utils import timezone
 
-Usuario = get_user_model()
+# Usando el modelo de usuario por defecto de Django
+UserModel = get_user_model()
 
+# Comentando temporalmente los serializadores que dependen del modelo de usuario personalizado
+'''
 class UsuarioSerializer(serializers.ModelSerializer):
     """Serializador para el modelo Usuario."""
     class Meta:
-        model = Usuario
-        fields = ('id', 'email', 'first_name', 'last_name', 'telefono', 'fecha_registro')
-        read_only_fields = ('id', 'fecha_registro')
+        model = UserModel
+        fields = ('id', 'email', 'first_name', 'last_name')
+        read_only_fields = ('id',)
 
 class UsuarioRegistroSerializer(serializers.ModelSerializer):
     """Serializador para el registro de nuevos usuarios."""
@@ -18,11 +23,12 @@ class UsuarioRegistroSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
     
     class Meta:
-        model = Usuario
-        fields = ('email', 'first_name', 'last_name', 'password', 'password2', 'telefono')
+        model = UserModel
+        fields = ('username', 'email', 'first_name', 'last_name', 'password', 'password2')
         extra_kwargs = {
             'first_name': {'required': True},
-            'last_name': {'required': True}
+            'last_name': {'required': True},
+            'email': {'required': True}
         }
     
     def validate(self, attrs):
@@ -34,10 +40,11 @@ class UsuarioRegistroSerializer(serializers.ModelSerializer):
         # Eliminamos password2 ya que no es un campo del modelo
         validated_data.pop('password2', None)
         password = validated_data.pop('password')
-        user = Usuario(**validated_data)
+        user = UserModel(**validated_data)
         user.set_password(password)
         user.save()
         return user
+'''
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     """Serializador personalizado para la obtención de tokens JWT."""
