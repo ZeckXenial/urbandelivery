@@ -74,8 +74,16 @@ WSGI_APPLICATION = 'urbanfood.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'urbanfood_db',
+        'USER': 'root',  # Cambia esto por tu usuario de MySQL
+        'PASSWORD': 'tu_contraseña',  # Cambia esto por tu contraseña de MySQL
+        'HOST': 'localhost',
+        'PORT': '3306',
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            'charset': 'utf8mb4',
+        },
     }
 }
 
@@ -120,3 +128,11 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Configuración para MySQL
+# Asegura que los campos de texto largos funcionen correctamente
+DEFAULT_CHARSET = 'utf8mb4'
+
+# Tamaño máximo de conexión para MySQL
+# (ajusta según las necesidades de tu aplicación)
+CONN_MAX_AGE = 300  # 5 minutos

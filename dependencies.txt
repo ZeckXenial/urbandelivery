@@ -1,10 +1,10 @@
 
 # Dependencias Python (requirements.txt)
 Django>=4.2,<5.0
-psycopg2-binary>=2.9
+mysqlclient>=2.1.0  # Cliente MySQL para Python
 Pillow>=9.0
-django-enum-fields>=1.0
 django-crispy-forms>=1.14
+
 
 # CDNs para Frontend
 
