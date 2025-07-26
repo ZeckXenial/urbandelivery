@@ -1,0 +1,269 @@
+{# JavaScript para el componente de mapa de entrega #}
+
+{% block extra_js %}
+<script>
+// Inicializar el mapa de entrega
+function initMapaEntrega{{ pedido.id_pedido|slugify }}() {
+    const mapaEl = document.getElementById('mapa-entrega-{{ pedido.id_pedido }}');
+    if (!mapaEl) return;
+    
+    // Coordenadas
+    const origen = {
+        lat: parseFloat(mapaEl.dataset.origenLat),
+        lng: parseFloat(mapaEl.dataset.origenLng)
+    };
+    
+    const destino = {
+        lat: parseFloat(mapaEl.dataset.destinoLat || (origen.lat + 0.01)),
+        lng: parseFloat(mapaEl.dataset.destinoLng || (origen.lng + 0.01))
+    };
+    
+    const repartidor = {
+        lat: parseFloat(mapaEl.dataset.repartidorLat || origen.lat),
+        lng: parseFloat(mapaEl.dataset.repartidorLng || origen.lng)
+    };
+    
+    // Inicializar mapa
+    const map = L.map(mapaEl, {
+        zoomControl: false,
+        scrollWheelZoom: false,
+        doubleClickZoom: false
+    }).setView([origen.lat, origen.lng], 15);
+    
+    // Añadir capa de mapa
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
+    }).addTo(map);
+    
+    // Añadir marcadores
+    const iconos = {
+        inicio: L.divIcon({
+            html: '<div class="map-marker-inicio"><i class="fas fa-store"></i></div>',
+            className: 'map-marker',
+            iconSize: [40, 40],
+            iconAnchor: [20, 40]
+        }),
+        fin: L.divIcon({
+            html: '<div class="map-marker-fin"><i class="fas fa-home"></i></div>',
+            className: 'map-marker',
+            iconSize: [40, 40],
+            iconAnchor: [20, 40]
+        }),
+        repartidor: L.divIcon({
+            html: '<div class="map-marker-repartidor"><i class="fas fa-motorcycle"></i></div>',
+            className: 'map-marker',
+            iconSize: [40, 40],
+            iconAnchor: [20, 40]
+        })
+    };
+    
+    // Marcador de origen
+    L.marker([origen.lat, origen.lng], {
+        icon: iconos.inicio,
+        riseOnHover: true
+    }).addTo(map).bindPopup('{{ pedido.origen.nombre|default:"Punto de recogida" }}');
+    
+    // Marcador de destino
+    L.marker([destino.lat, destino.lng], {
+        icon: iconos.fin,
+        riseOnHover: true
+    }).addTo(map).bindPopup('{{ pedido.destino.direccion|default:"Destino" }}');
+    
+    // Marcador del repartidor
+    const repartidorMarker = L.marker([repartidor.lat, repartidor.lng], {
+        icon: iconos.repartidor,
+        zIndexOffset: 1000
+    }).addTo(map).bindPopup('{{ pedido.repartidor.nombre|default:"Repartidor" }}');
+    
+    // Ajustar el mapa para que se vean todos los marcadores
+    const bounds = L.latLngBounds([origen, destino]);
+    map.fitBounds(bounds, { padding: [50, 50] });
+    
+    // Variables para el seguimiento de la ubicación
+    let intervaloUbicacion;
+    let routingControl = null;
+    
+    // Función para actualizar la ubicación del repartidor
+    function actualizarUbicacionRepartidor() {
+        // En una implementación real, esto haría una petición al servidor
+        // para obtener la ubicación actualizada del repartidor
+        console.log('Actualizando ubicación del repartidor...');
+        
+        // Simulación de movimiento para demostración
+        if (Math.random() > 0.7) {
+            const latOffset = (Math.random() - 0.5) * 0.001;
+            const lngOffset = (Math.random() - 0.5) * 0.001;
+            
+            repartidor.lat += latOffset;
+            repartidor.lng += lngOffset;
+            
+            // Mover el marcador
+            repartidorMarker.setLatLng([repartidor.lat, repartidor.lng]);
+            
+            // Actualizar la ruta si existe
+            if (routingControl) {
+                routingControl.setWaypoints([
+                    L.latLng(repartidor.lat, repartidor.lng),
+                    L.latLng(destino.lat, destino.lng)
+                ]);
+            }
+            
+            // Rotar el icono del repartidor para simular movimiento
+            const iconElement = repartidorMarker.getElement();
+            if (iconElement) {
+                const angle = Math.atan2(lngOffset, latOffset) * 180 / Math.PI + 90;
+                iconElement.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+            }
+        }
+    }
+    
+    // Inicializar el enrutamiento si está disponible
+    if (L.Routing) {
+        routingControl = L.Routing.control({
+            waypoints: [
+                L.latLng(repartidor.lat, repartidor.lng),
+                L.latLng(destino.lat, destino.lng)
+            ],
+            routeWhileDragging: false,
+            show: false,
+            lineOptions: {
+                styles: [{
+                    color: '#0d6efd',
+                    opacity: 0.7,
+                    weight: 5
+                }]
+            },
+            createMarker: function() { return null; } // No mostrar marcadores adicionales
+        }).addTo(map);
+        
+        // Actualizar la ruta cuando cambian los waypoints
+        routingControl.on('routesfound', function(e) {
+            const routes = e.routes;
+            if (routes && routes[0]) {
+                // Actualizar la distancia y duración estimada
+                const distance = (routes[0].summary.totalDistance / 1000).toFixed(1);
+                const time = Math.ceil(routes[0].summary.totalTime / 60);
+                console.log(`Distancia: ${distance} km, Tiempo estimado: ${time} min`);
+            }
+        });
+    }
+    
+    // Iniciar el seguimiento de ubicación
+    function iniciarSeguimiento() {
+        if (!intervaloUbicacion) {
+            intervaloUbicacion = setInterval(actualizarUbicacionRepartidor, 5000);
+            console.log('Seguimiento de ubicación iniciado');
+        }
+    }
+    
+    // Detener el seguimiento de ubicación
+    function detenerSeguimiento() {
+        if (intervaloUbicacion) {
+            clearInterval(intervaloUbicacion);
+            intervaloUbicacion = null;
+            console.log('Seguimiento de ubicación detenido');
+        }
+    }
+    
+    // Iniciar el seguimiento cuando el mapa esté listo
+    map.whenReady(function() {
+        console.log('Mapa listo, iniciando seguimiento...');
+        iniciarSeguimiento();
+    });
+    
+    // Limpiar intervalo cuando se cierre el mapa
+    map.on('unload', function() {
+        detenerSeguimiento();
+    });
+    
+    // Manejar la visibilidad del mapa
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // El mapa es visible, iniciar seguimiento
+                map.invalidateSize(); // Asegurar que el mapa se redimensione correctamente
+                iniciarSeguimiento();
+            } else {
+                // El mapa no es visible, detener seguimiento para ahorrar recursos
+                detenerSeguimiento();
+            }
+        });
+    }, {
+        threshold: 0.1 // 10% del elemento visible
+    });
+    
+    // Observar el elemento del mapa
+    observer.observe(mapaEl);
+    
+    // Limpiar al desmontar
+    return () => {
+        detenerSeguimiento();
+        observer.disconnect();
+        map.remove();
+    };
+}
+
+// Cargar las dependencias necesarias
+function cargarDependenciasMapa() {
+    // Verificar si Leaflet ya está cargado
+    if (typeof L === 'undefined') {
+        // Cargar CSS de Leaflet
+        const leafletCSS = document.createElement('link');
+        leafletCSS.rel = 'stylesheet';
+        leafletCSS.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+        leafletCSS.integrity = 'sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=';
+        leafletCSS.crossOrigin = '';
+        document.head.appendChild(leafletCSS);
+        
+        // Cargar JavaScript de Leaflet
+        return new Promise((resolve) => {
+            const script = document.createElement('script');
+            script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+            script.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
+            script.crossOrigin = '';
+            script.onload = function() {
+                // Cargar el plugin de enrutamiento después de Leaflet
+                cargarPluginEnrutamiento().then(resolve);
+            };
+            document.head.appendChild(script);
+        });
+    } else {
+        // Leaflet ya está cargado, cargar el plugin de enrutamiento si es necesario
+        return cargarPluginEnrutamiento();
+    }
+}
+
+// Cargar el plugin de enrutamiento
+function cargarPluginEnrutamiento() {
+    // Verificar si el plugin de enrutamiento ya está cargado
+    if (typeof L.Routing !== 'undefined') {
+        return Promise.resolve();
+    }
+    
+    // Cargar CSS del plugin de enrutamiento
+    const routingCSS = document.createElement('link');
+    routingCSS.rel = 'stylesheet';
+    routingCSS.href = 'https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css';
+    document.head.appendChild(routingCSS);
+    
+    // Cargar JavaScript del plugin de enrutamiento
+    return new Promise((resolve) => {
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.min.js';
+        script.onload = resolve;
+        document.head.appendChild(script);
+    });
+}
+
+// Inicializar el mapa cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    // Cargar dependencias y luego inicializar el mapa
+    cargarDependenciasMapa().then(function() {
+        initMapaEntrega{{ pedido.id_pedido|slugify }}();
+    }).catch(function(error) {
+        console.error('Error al cargar las dependencias del mapa:', error);
+    });
+});
+</script>
+{% endblock %}

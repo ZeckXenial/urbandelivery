@@ -1,0 +1,236 @@
+{% extends 'clientes/base.html' %}
+{% load static %}
+
+{% block page_title %}Mis Favoritos{% endblock %}
+
+{% block content_client %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">Mis Favoritos</h1>
+    <div>
+        <a href="{% url 'clientes:catalogo' %}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-1"></i> Seguir comprando
+        </a>
+    </div>
+</div>
+
+{% if productos %}
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for producto in productos %}
+    <div class="col">
+        <div class="card h-100">
+            <div class="position-relative">
+                <a href="{% url 'clientes:detalle_producto' producto.id %}">
+                    <img src="{{ producto.imagen.url }}" class="card-img-top" 
+                         alt="{{ producto.nombre }}" 
+                         style="height: 200px; object-fit: cover;">
+                </a>
+                <button class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2 rounded-circle favorito-btn" 
+                        data-producto-id="{{ producto.id }}" 
+                        data-url="{% url 'clientes:toggle_favorito' producto.id %}"
+                        style="width: 36px; height: 36px;">
+                    <i class="fas fa-heart"></i>
+                </button>
+                {% if producto.descuento %}
+                <span class="badge bg-danger position-absolute top-0 start-0 m-2">
+                    -{{ producto.descuento }}%
+                </span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title mb-1">
+                        <a href="{% url 'clientes:detalle_producto' producto.id %}" class="text-decoration-none text-dark">
+                            {{ producto.nombre }}
+                        </a>
+                    </h5>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-star text-warning me-1"></i>
+                        <span class="text-muted">{{ producto.calificacion_promedio|default:"N/A" }}</span>
+                    </div>
+                </div>
+                <p class="text-muted small mb-2">
+                    <i class="fas fa-store me-1"></i> {{ producto.vendedor.nombre_negocio }}
+                </p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        {% if producto.precio_descuento %}
+                        <span class="h5 mb-0 text-primary">${{ producto.precio_descuento|floatformat:2 }}</span>
+                        <small class="text-muted text-decoration-line-through ms-1">
+                            ${{ producto.precio|floatformat:2 }}
+                        </small>
+                        {% else %}
+                        <span class="h5 mb-0 text-primary">${{ producto.precio|floatformat:2 }}</span>
+                        {% endif %}
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary add-to-cart" 
+                            data-producto-id="{{ producto.id }}"
+                            data-url="{% url 'clientes:agregar_al_carrito' %}">
+                        <i class="fas fa-shopping-cart me-1"></i> Añadir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Paginación -->
+{% if is_paginated %}
+<nav aria-label="Paginación de favoritos" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page=1" aria-label="Primera">
+                <span aria-hidden="true">&laquo;&laquo;</span>
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Anterior">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        {% endif %}
+        
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <li class="page-item active">
+                <span class="page-link">{{ num }}</span>
+            </li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Siguiente">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Última">
+                <span aria-hidden="true">&raquo;&raquo;</span>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="text-center py-5">
+    <i class="fas fa-heart fa-4x text-muted mb-3"></i>
+    <h4>No tienes productos favoritos</h4>
+    <p class="text-muted">Guarda tus productos favoritos para encontrarlos fácilmente más tarde.</p>
+    <a href="{% url 'clientes:catalogo' %}" class="btn btn-primary">
+        <i class="fas fa-utensils me-2"></i> Explorar productos
+    </a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Manejar el botón de favoritos
+    document.querySelectorAll('.favorito-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const productoId = this.dataset.productoId;
+            const url = this.dataset.url;
+            
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFTTOKEN': '{{ csrf_token }}',
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.removed) {
+                    // Si se eliminó de favoritos, eliminar el elemento del DOM
+                    const card = this.closest('.col');
+                    if (card) {
+                        card.remove();
+                        
+                        // Actualizar contador de favoritos en la barra de navegación si existe
+                        const favCount = document.getElementById('favoritos-count');
+                        if (favCount) {
+                            const newCount = parseInt(favCount.textContent) - 1;
+                            favCount.textContent = newCount > 0 ? newCount : '';
+                            if (newCount <= 0) {
+                                window.location.reload(); // Recargar si no hay más favoritos
+                            }
+                        }
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Ocurrió un error al actualizar tus favoritos');
+            });
+        });
+    });
+    
+    // Manejar el botón de añadir al carrito
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+        button.addEventListener('click', function() {
+            const productoId = this.dataset.productoId;
+            const url = this.dataset.url;
+            
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFTTOKEN': '{{ csrf_token }}',
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    'producto_id': productoId,
+                    'cantidad': 1
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Mostrar notificación de éxito
+                    const toast = new bootstrap.Toast(document.getElementById('toastAgregado'));
+                    toast.show();
+                    
+                    // Actualizar contador del carrito
+                    const cartCount = document.getElementById('carrito-count');
+                    if (cartCount) {
+                        cartCount.textContent = data.carrito_count || '';
+                    }
+                } else {
+                    alert(data.message || 'Error al agregar al carrito');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Ocurrió un error al agregar el producto al carrito');
+            });
+        });
+    });
+});
+</script>
+{% endblock %}
+
+{% block extra_toast %}
+<!-- Toast para notificación de producto agregado -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="toastAgregado" class="toast align-items-center text-white bg-success" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="fas fa-check-circle me-2"></i> Producto agregado al carrito
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,119 @@
+{# Componente para mostrar mensajes flash #}
+
+{# Contenedor principal de mensajes #}
+<div id="mensajes-container" aria-live="polite" aria-atomic="true" class="position-fixed top-0 end-0 p-3" style="z-index: 1100;">
+    {# Mensajes de Django #}
+    {% if messages %}
+        {% for message in messages %}
+            {% with tipo_clase=message.tags|default:'info' %}
+                <div class="toast show mb-2" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="5000">
+                    <div class="toast-header bg-{{ tipo_clase }} text-white">
+                        <strong class="me-auto">
+                            {% if tipo_clase == 'success' %}
+                                <i class="fas fa-check-circle me-2"></i>Éxito
+                            {% elif tipo_clase == 'error' or tipo_clase == 'danger' %}
+                                <i class="fas fa-exclamation-circle me-2"></i>Error
+                            {% elif tipo_clase == 'warning' %}
+                                <i class="fas fa-exclamation-triangle me-2"></i>Advertencia
+                            {% elif tipo_clase == 'info' %}
+                                <i class="fas fa-info-circle me-2"></i>Información
+                            {% else %}
+                                <i class="fas fa-bell me-2"></i>Notificación
+                            {% endif %}
+                        </strong>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="toast-body">
+                        {{ message }}
+                    </div>
+                </div>
+            {% endwith %}
+        {% endfor %}
+    {% endif %}
+    
+    {# Toast para notificaciones dinámicas (ej: añadir al carrito) #}
+    <div id="toastCarrito" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="3000">
+        <div class="toast-header bg-primary text-white">
+            <strong class="me-auto">
+                <i class="fas fa-shopping-cart me-2"></i>Carrito
+            </strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+        </div>
+        <div class="toast-body" id="toastCarritoMessage">
+            Producto añadido al carrito
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+// Inicializar los toasts de Bootstrap
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar toasts de mensajes
+    const toastElList = [].slice.call(document.querySelectorAll('.toast'));
+    const toastList = toastElList.map(function(toastEl) {
+        // Configurar para que se cierren automáticamente después de 5 segundos
+        const toast = new bootstrap.Toast(toastEl, {
+            autohide: true,
+            delay: 5000
+        });
+        
+        // Mostrar el toast
+        toast.show();
+        
+        // Eliminar el toast del DOM después de que se oculte
+        toastEl.addEventListener('hidden.bs.toast', function() {
+            toastEl.remove();
+        });
+        
+        return toast;
+    });
+    
+    // Función para mostrar notificación dinámica
+    window.mostrarNotificacion = function(titulo, mensaje, tipo = 'info') {
+        const container = document.getElementById('mensajes-container');
+        const toastId = 'toast-' + Date.now();
+        
+        const iconos = {
+            'success': 'check-circle',
+            'error': 'exclamation-circle',
+            'warning': 'exclamation-triangle',
+            'info': 'info-circle'
+        };
+        
+        const icono = iconos[tipo] || 'bell';
+        
+        const toastHTML = `
+            <div id="${toastId}" class="toast show mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header bg-${tipo} text-white">
+                    <strong class="me-auto">
+                        <i class="fas fa-${icono} me-2"></i>${titulo}
+                    </strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+                </div>
+                <div class="toast-body">
+                    ${mensaje}
+                </div>
+            </div>
+        `;
+        
+        // Insertar el nuevo toast
+        container.insertAdjacentHTML('beforeend', toastHTML);
+        
+        // Inicializar y mostrar el toast
+        const toastEl = document.getElementById(toastId);
+        const toast = new bootstrap.Toast(toastEl, {
+            autohide: true,
+            delay: 5000
+        });
+        
+        toast.show();
+        
+        // Eliminar el toast del DOM después de que se oculte
+        toastEl.addEventListener('hidden.bs.toast', function() {
+            toastEl.remove();
+        });
+    };
+});
+</script>
+{% endblock %}

@@ -1,0 +1,113 @@
+{# Componente de mapa de entrega reutilizable - Parte 1 #}
+
+<!-- Incluir JavaScript del mapa -->
+{% include 'shared/componentes/mapa_entrega_js.html' %}
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="fas fa-map-marker-alt me-2"></i>Seguimiento de entrega
+        </h5>
+        <div>
+            <span class="badge bg-{{ pedido.estado_clase }}">
+                {{ pedido.estado_display }}
+            </span>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div id="mapa-entrega-{{ pedido.id_pedido }}" 
+             class="mapa-entrega" 
+             style="height: 400px; width: 100%;"
+             data-origen-lat="{{ pedido.origen.latitud|default:'-33.4489' }}"
+             data-origen-lng="{{ pedido.origen.longitud|default:'-70.6693' }}"
+             data-destino-lat="{{ pedido.destino.latitud|default:'' }}"
+             data-destino-lng="{{ pedido.destino.longitud|default:'' }}"
+             data-repartidor-lat="{{ pedido.repartidor.ubicacion.latitud|default:'' }}"
+             data-repartidor-lng="{{ pedido.repartidor.ubicacion.longitud|default:'' }}">
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando mapa...</span>
+                </div>
+                <p class="mt-2">Cargando mapa de seguimiento...</p>
+            </div>
+        </div>
+        
+        <div class="p-3 border-top">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="me-2">
+                            <i class="fas fa-store text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">Restaurante</h6>
+                            <small class="text-muted">{{ pedido.origen.nombre|default:'Restaurante' }}</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="me-2">
+                            <i class="fas fa-home text-success"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">Destino</h6>
+                            <small class="text-muted">{{ pedido.destino.direccion|default:'Tu dirección' }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if pedido.repartidor %}
+            <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                <div class="d-flex align-items-center">
+                    <div class="avatar avatar-sm me-3">
+                        <img src="{{ pedido.repartidor.foto|default:'/static/img/avatar-placeholder.png' }}" 
+                             alt="{{ pedido.repartidor.nombre }}" 
+                             class="rounded-circle"
+                             width="40" 
+                             height="40"
+                             style="object-fit: cover;">
+                    </div>
+                    <div>
+                        <h6 class="mb-0">{{ pedido.repartidor.nombre }}</h6>
+                        <small class="text-muted">Tu repartidor</small>
+                    </div>
+                </div>
+                <div>
+                    {% if pedido.repartidor.telefono %}
+                    <a href="tel:{{ pedido.repartidor.telefono }}" class="btn btn-sm btn-outline-primary me-2">
+                        <i class="fas fa-phone-alt me-1"></i> Llamar
+                    </a>
+                    {% endif %}
+                    <a href="https://wa.me/{{ pedido.repartidor.whatsapp|default:pedido.repartidor.telefono|default:'' }}" 
+                       class="btn btn-sm btn-success"
+                       target="_blank">
+                        <i class="fab fa-whatsapp me-1"></i> WhatsApp
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="mt-3">
+                <div class="progress" style="height: 10px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" 
+                         style="width: {{ pedido.porcentaje_completado|default:25 }}%;" 
+                         aria-valuenow="{{ pedido.porcentaje_completado|default:25 }}" 
+                         aria-valuemin="0" 
+                         aria-valuemax="100">
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between mt-1">
+                    <small class="text-muted">En preparación</small>
+                    <small class="text-muted">En camino</small>
+                    <small class="text-muted">Entregado</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Incluir estilos CSS del mapa #}
+{% include 'shared/componentes/mapa_entrega_css.html' %}

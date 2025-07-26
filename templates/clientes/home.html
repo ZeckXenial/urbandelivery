@@ -1,0 +1,126 @@
+{% extends 'clientes/base.html' %}
+{% load static %}
+
+{% block page_title %}Bienvenido, {{ request.user.cliente.nombre|default:'Cliente' }}{% endblock %}
+
+{% block content_client %}
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">¡Bienvenido a UrbanFood!</h5>
+                <p class="card-text">Disfruta de tus platillos favoritos desde la comodidad de tu hogar.</p>
+                <a href="{% url 'clientes:catalogo' %}" class="btn btn-primary">Ver Catálogo</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Productos destacados -->
+    <div class="col-12 mb-4">
+        <h4>Productos Destacados</h4>
+        <div class="row">
+            {% for producto in productos_destacados %}
+            <div class="col-md-3 mb-4">
+                {% include 'clientes/includes/tarjeta_producto.html' with producto=producto %}
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info">No hay productos destacados disponibles.</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Categorías populares -->
+    <div class="col-12">
+        <h4>Explorar Categorías</h4>
+        <div class="row">
+            {% for categoria in categorias_populares %}
+            <div class="col-md-2 mb-4">
+                <a href="{% url 'clientes:catalogo' %}?categoria={{ categoria.id }}" class="text-decoration-none">
+                    <div class="card h-100">
+                        <div class="card-body text-center">
+                            <i class="fas fa-utensils fa-3x mb-2 text-primary"></i>
+                            <h6 class="card-title">{{ categoria.nombre }}</h6>
+                            <p class="text-muted small mb-0">{{ categoria.num_productos }} productos</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info">No hay categorías disponibles.</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Últimos pedidos -->
+{% if pedidos_recientes %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Tus Últimos Pedidos</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th># Pedido</th>
+                                <th>Fecha</th>
+                                <th>Total</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pedido in pedidos_recientes %}
+                            <tr>
+                                <td>#{{ pedido.id }}</td>
+                                <td>{{ pedido.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                                <td>${{ pedido.total|floatformat:2 }}</td>
+                                <td>
+                                    <span class="badge bg-{{ pedido.estado.clase }}">
+                                        {{ pedido.estado.nombre }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'clientes:detalle_pedido' pedido.id %}" class="btn btn-sm btn-outline-primary">
+                                        Ver Detalle
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-end mt-3">
+                    <a href="{% url 'clientes:lista_pedidos' %}" class="btn btn-outline-primary">
+                        Ver todos los pedidos <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+    // Scripts específicos para la página de inicio
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+{% endblock %}

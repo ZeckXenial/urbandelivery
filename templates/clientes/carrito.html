@@ -1,0 +1,74 @@
+{% extends 'clientes/base.html' %}
+{% load static %}
+
+{% block page_title %}Mi Carrito de Compras{% endblock %}
+
+{% block content_client %}
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Productos en el carrito</h5>
+            </div>
+            <div class="card-body">
+                {% if productos_en_carrito %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th style="width: 100px;">Producto</th>
+                                <th>Descripción</th>
+                                <th class="text-center">Precio</th>
+                                <th class="text-center">Cantidad</th>
+                                <th class="text-center">Subtotal</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in productos_en_carrito %}
+                            <tr>
+                                <td>
+                                    <img src="{{ item.producto.imagen.url }}" alt="{{ item.producto.nombre }}" 
+                                         class="img-fluid rounded" style="max-height: 60px;">
+                                </td>
+                                <td>
+                                    <h6 class="mb-1">{{ item.producto.nombre }}</h6>
+                                    <small class="text-muted">{{ item.producto.descripcion|truncatewords:10 }}</small>
+                                </td>
+                                <td class="text-center">${{ item.producto.precio|floatformat:2 }}</td>
+                                <td class="text-center">
+                                    <form action="{% url 'clientes:actualizar_carrito' %}" method="post" class="update-form">
+                                        {% csrf_token %}
+                                        <div class="input-group input-group-sm" style="width: 120px;">
+                                            <button class="btn btn-outline-secondary btn-minus" type="button">-</button>
+                                            <input type="number" name="cantidad" class="form-control text-center" 
+                                                   value="{{ item.cantidad }}" min="1" max="{{ item.producto.stock }}" 
+                                                   data-product-id="{{ item.producto.id }}">
+                                            <button class="btn btn-outline-secondary btn-plus" type="button">+</button>
+                                        </div>
+                                    </form>
+                                </td>
+                                <td class="text-center">${{ item.subtotal|floatformat:2 }}</td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-outline-danger remove-item" 
+                                            data-product-id="{{ item.producto.id }}">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+                    <h4>Tu carrito está vacío</h4>
+                    <p class="text-muted">Agrega productos para comenzar tu compra</p>
+                    <a href="{% url 'clientes:catalogo' %}" class="btn btn-primary">
+                        <i class="fas fa-utensils me-2"></i> Ver catálogo
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>

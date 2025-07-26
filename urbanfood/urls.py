@@ -30,6 +30,9 @@ api_urlpatterns = [
     # API Repartidores
     path('api/repartidores/', include('repartidores.api_urls')),
     
+    # API Pedidos
+    path('api/pedidos/', include('pedidos.urls')),
+    
     # API Autenticación JWT
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
@@ -77,6 +80,9 @@ urlpatterns = [
     
     # Perfil de usuario
     path('perfil/', core_views.ProfileView.as_view(), name='profile'),
+    
+    # Clientes
+    path('cliente/', include('clientes.urls', namespace='clientes')),
     
     # Admin
     path('admin/', admin.site.urls),

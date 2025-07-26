@@ -1,0 +1,191 @@
+{% extends 'clientes/base.html' %}
+{% load static %}
+
+{% block page_title %}Mis Pedidos{% endblock %}
+
+{% block content_client %}
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Historial de Pedidos</h5>
+        <div class="d-flex
+            <div class="input-group input-group-sm" style="width: 250px;">
+                <input type="text" class="form-control" placeholder="Buscar pedidos..." id="buscarPedidos">
+                <button class="btn btn-outline-secondary" type="button">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if pedidos %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th># Pedido</th>
+                        <th>Fecha</th>
+                        <th>Productos</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pedido in pedidos %}
+                    <tr>
+                        <td>#{{ pedido.id }}</td>
+                        <td>{{ pedido.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                        <td>{{ pedido.detalles.count }} producto{{ pedido.detalles.count|pluralize }}</td>
+                        <td>${{ pedido.total|floatformat:2 }}</td>
+                        <td>
+                            <span class="badge bg-{{ pedido.estado.clase }}">
+                                {{ pedido.estado.nombre }}
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <a href="{% url 'clientes:detalle_pedido' pedido.id %}" 
+                               class="btn btn-sm btn-outline-primary">
+                                Ver detalle
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Paginación -->
+        {% if is_paginated %}
+        <nav aria-label="Navegación de pedidos">
+            <ul class="pagination justify-content-center mt-4">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1" aria-label="Primera">
+                        <span aria-hidden="true">&laquo;&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Anterior">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Siguiente">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Última">
+                        <span aria-hidden="true">&raquo;&raquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-shopping-bag fa-4x text-muted mb-3"></i>
+            <h4>Aún no tienes pedidos</h4>
+            <p class="text-muted">Cuando hagas un pedido, aparecerá aquí.</p>
+            <a href="{% url 'clientes:catalogo' %}" class="btn btn-primary">
+                <i class="fas fa-utensils me-2"></i> Ver catálogo
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Filtros de pedidos -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Filtrar pedidos</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="estado" class="form-label">Estado</label>
+                <select name="estado" id="estado" class="form-select">
+                    <option value="">Todos los estados</option>
+                    {% for estado in estados %}
+                    <option value="{{ estado.id }}" {% if request.GET.estado == estado.id|stringformat:'s' %}selected{% endif %}>
+                        {{ estado.nombre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="fecha_desde" class="form-label">Fecha desde</label>
+                <input type="date" class="form-control" id="fecha_desde" name="fecha_desde" 
+                       value="{{ request.GET.fecha_desde }}">
+            </div>
+            <div class="col-md-4">
+                <label for="fecha_hasta" class="form-label">Fecha hasta</label>
+                <input type="date" class="form-control" id="fecha_hasta" name="fecha_hasta"
+                       value="{{ request.GET.fecha_hasta }}">
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter me-2"></i>Filtrar
+                </button>
+                <a href="{% url 'clientes:lista_pedidos' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-undo me-2"></i>Limpiar filtros
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar datepickers
+    const fechaDesde = document.getElementById('fecha_desde');
+    const fechaHasta = document.getElementById('fecha_hasta');
+    
+    if (fechaHasta && !fechaHasta.value) {
+        const today = new Date();
+        fechaHasta.value = today.toISOString().split('T')[0];
+    }
+    
+    if (fechaDesde && fechaHasta) {
+        fechaDesde.max = fechaHasta.value;
+        
+        fechaHasta.addEventListener('change', function() {
+            fechaDesde.max = this.value;
+        });
+    }
+    
+    // Búsqueda en tiempo real
+    const buscarInput = document.getElementById('buscarPedidos');
+    if (buscarInput) {
+        buscarInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,198 @@
+{# Componente de tarjeta de pedido reutilizable #}
+
+<div class="card mb-3 order-card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div>
+            <span class="badge bg-{{ pedido.estado_clase }}">
+                {{ pedido.estado_display }}
+            </span>
+            <span class="ms-2 text-muted small">
+                #{{ pedido.id_pedido|stringformat:"06d" }}
+            </span>
+        </div>
+        <div class="text-muted small">
+            {{ pedido.fecha_pedido|date:"d M Y H:i" }}
+        </div>
+    </div>
+    
+    <div class="card-body">
+        {# Resumen de productos #}
+        <div class="mb-3">
+            {% for item in pedido.items %}
+            <div class="d-flex mb-2">
+                <div class="flex-shrink-0">
+                    <img src="{{ item.img_producto|default:'/static/img/placeholder-product.jpg' }}" 
+                         alt="{{ item.nombre }}" 
+                         class="rounded" 
+                         width="60" 
+                         height="60"
+                         style="object-fit: cover;">
+                </div>
+                <div class="flex-grow-1 ms-3">
+                    <h6 class="mb-0">{{ item.nombre }}</h6>
+                    <div class="text-muted small">
+                        {{ item.cantidad }} x ${{ item.precio_unitario|floatformat:2 }}
+                        {% if item.notas %}
+                        <div class="text-muted fst-italic">
+                            <small>{{ item.notas }}</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="text-end" style="min-width: 80px;">
+                    ${{ item.subtotal|floatformat:2 }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <hr>
+        
+        {# Resumen del pedido #}
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Dirección de entrega</h6>
+                <address class="small">
+                    {{ pedido.direccion.calle }}, {{ pedido.direccion.numero }}<br>
+                    {% if pedido.direccion.depto %}
+                        Depto {{ pedido.direccion.depto }}<br>
+                    {% endif %}
+                    {{ pedido.direccion.comuna }}, {{ pedido.direccion.region }}<br>
+                    {{ pedido.direccion.codigo_postal }}
+                </address>
+                
+                {% if pedido.instrucciones_entrega %}
+                <div class="alert alert-light border small p-2 mt-2">
+                    <strong>Instrucciones:</strong> {{ pedido.instrucciones_entrega }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="col-md-6">
+                <div class="table-responsive">
+                    <table class="table table-sm table-borderless">
+                        <tbody>
+                            <tr>
+                                <th class="text-end">Subtotal:</th>
+                                <td class="text-end">${{ pedido.subtotal|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-end">Envío:</th>
+                                <td class="text-end">${{ pedido.envio|floatformat:2 }}</td>
+                            </tr>
+                            {% if pedido.descuento > 0 %}
+                            <tr class="text-success">
+                                <th class="text-end">Descuento:</th>
+                                <td class="text-end">-${{ pedido.descuento|floatformat:2 }}</td>
+                            </tr>
+                            {% endif %}
+                            <tr class="fw-bold">
+                                <th class="text-end">Total:</th>
+                                <td class="text-end">${{ pedido.total|floatformat:2 }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <span class="small text-muted">
+                        <i class="fas fa-credit-card me-1"></i>
+                        {{ pedido.metodo_pago }}
+                    </span>
+                    
+                    {% if pedido.puede_calificar %}
+                    <button class="btn btn-sm btn-outline-warning" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#modalValorarPedido"
+                            data-pedido-id="{{ pedido.id_pedido }}">
+                        <i class="fas fa-star"></i> Valorar
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card-footer bg-transparent">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                {% if pedido.repartidor %}
+                <span class="small">
+                    <i class="fas fa-motorcycle me-1"></i>
+                    {{ pedido.repartidor.nombre }}
+                    {% if pedido.repartidor.telefono %}
+                    <a href="tel:{{ pedido.repartidor.telefono }}" class="ms-2">
+                        <i class="fas fa-phone-alt"></i>
+                    </a>
+                    {% endif %}
+                </span>
+                {% endif %}
+            </div>
+            
+            <div>
+                {% if pedido.puede_cancelar %}
+                <button class="btn btn-sm btn-outline-danger me-2"
+                        data-bs-toggle="modal" 
+                        data-bs-target="#modalCancelarPedido"
+                        data-pedido-id="{{ pedido.id_pedido }}">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                {% endif %}
+                
+                <a href="{% url 'pedido_detalle' pedido.id_pedido %}" 
+                   class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-eye me-1"></i> Ver detalle
+                </a>
+            </div>
+        </div>
+        
+        {% if pedido.ubicacion_actual %}
+        <div class="mt-3" id="mapa-entrega-{{ pedido.id_pedido }}" 
+             style="height: 200px;" 
+             data-lat="{{ pedido.ubicacion_actual.latitud }}"
+             data-lng="{{ pedido.ubicacion_actual.longitud }}">
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if pedido.ubicacion_actual %}
+{% block extra_js %}
+<script>
+// Inicializar mapa de seguimiento
+function initMap{{ pedido.id_pedido|slugify }}() {
+    const lat = parseFloat('{{ pedido.ubicacion_actual.latitud }}');
+    const lng = parseFloat('{{ pedido.ubicacion_actual.longitud }}');
+    
+    const map = L.map('mapa-entrega-{{ pedido.id_pedido }}').setView([lat, lng], 15);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    
+    // Agregar marcador de ubicación actual
+    L.marker([lat, lng]).addTo(map)
+        .bindPopup('Ubicación actual del repartidor')
+        .openPopup();
+        
+    // Opcional: Actualizar ubicación en tiempo real
+    // setInterval(actualizarUbicacion, 10000); // Cada 10 segundos
+}
+
+// Llamar a la función cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function() {
+    // Cargar la API de Leaflet si no está cargada
+    if (typeof L === 'undefined') {
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.js';
+        script.integrity = 'sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==';
+        script.crossOrigin = '';
+        script.onload = initMap{{ pedido.id_pedido|slugify }};
+        document.head.appendChild(script);
+    } else {
+        initMap{{ pedido.id_pedido|slugify }}();
+    }
+});
+</script>
+{% endblock %}
+{% endif %}

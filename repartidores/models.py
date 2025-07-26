@@ -7,20 +7,130 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Repartidor(models.Model):
     """Modelo para repartidores que coincide con la tabla repartidores existente."""
+    
     class EstadoRepartidor(models.TextChoices):
         DISPONIBLE = 'disponible', _('Disponible')
         OCUPADO = 'ocupado', _('Ocupado')
         INACTIVO = 'inactivo', _('Inactivo')
         EN_PAUSA = 'en_pausa', _('En Pausa')
+        EN_ENTREGA = 'en_entrega', _('En Entrega')
+        NO_DISPONIBLE = 'no_disponible', _('No Disponible')
+    
+    class TipoDocumento(models.TextChoices):
+        DNI = 'dni', _('DNI')
+        CEDULA = 'cedula', _('Cédula')
+        PASAPORTE = 'pasaporte', _('Pasaporte')
+        OTRO = 'otro', _('Otro')
     
     id_repartidor = models.AutoField(primary_key=True)
-    # id_usuario = models.OneToOneField(
-    #     Usuario,
-    #     on_delete=models.CASCADE,
-    #     related_name='repartidor_profile',
-    #     verbose_name=_('usuario'),
-    #     db_column='id_usuario'
-    # )
+    id_usuario = models.OneToOneField(
+        Usuario,
+        on_delete=models.CASCADE,
+        related_name='repartidor_profile',
+        verbose_name=_('usuario'),
+        db_column='id_usuario',
+        help_text=_('Usuario del sistema asociado a este repartidor')
+    )
+    tipo_documento = models.CharField(
+        _('tipo de documento'),
+        max_length=20,
+        choices=TipoDocumento.choices,
+        default=TipoDocumento.DNI,
+        help_text=_('Tipo de documento de identificación')
+    )
+    numero_documento = models.CharField(
+        _('número de documento'),
+        max_length=20,
+        unique=True,
+        help_text=_('Número de documento de identificación')
+    )
+    fecha_nacimiento = models.DateField(
+        _('fecha de nacimiento'),
+        null=True,
+        blank=True,
+        help_text=_('Fecha de nacimiento del repartidor')
+    )
+    genero = models.CharField(
+        _('género'),
+        max_length=20,
+        null=True,
+        blank=True,
+        help_text=_('Género del repartidor')
+    )
+    telefono_emergencia = models.CharField(
+        _('teléfono de emergencia'),
+        max_length=20,
+        null=True,
+        blank=True,
+        help_text=_('Número de teléfono de contacto de emergencia')
+    )
+    contacto_emergencia = models.CharField(
+        _('contacto de emergencia'),
+        max_length=100,
+        null=True,
+        blank=True,
+        help_text=_('Nombre de la persona de contacto de emergencia')
+    )
+    fecha_ingreso = models.DateField(
+        _('fecha de ingreso'),
+        default=timezone.now,
+        help_text=_('Fecha en que el repartidor se unió a la plataforma')
+    )
+    fecha_vencimiento_licencia = models.DateField(
+        _('fecha de vencimiento de licencia'),
+        null=True,
+        blank=True,
+        help_text=_('Fecha de vencimiento de la licencia de conducir')
+    )
+    numero_seguro_social = models.CharField(
+        _('número de seguro social'),
+        max_length=50,
+        null=True,
+        blank=True,
+        help_text=_('Número de seguro social o equivalente')
+    )
+    banco = models.CharField(
+        _('banco'),
+        max_length=100,
+        null=True,
+        blank=True,
+        help_text=_('Nombre del banco para depósitos')
+    )
+    numero_cuenta = models.CharField(
+        _('número de cuenta'),
+        max_length=50,
+        null=True,
+        blank=True,
+        help_text=_('Número de cuenta bancaria')
+    )
+    tipo_cuenta = models.CharField(
+        _('tipo de cuenta'),
+        max_length=20,
+        null=True,
+        blank=True,
+        help_text=_('Tipo de cuenta bancaria (Ahorros, Corriente, etc.)')
+    )
+    direccion = models.JSONField(
+        _('dirección'),
+        null=True,
+        blank=True,
+        help_text=_('Dirección del repartidor en formato JSON')
+    )
+    fecha_registro = models.DateTimeField(
+        _('fecha de registro'),
+        auto_now_add=True,
+        help_text=_('Fecha en que se registró el repartidor')
+    )
+    ultima_actualizacion = models.DateTimeField(
+        _('última actualización'),
+        auto_now=True,
+        help_text=_('Fecha de la última actualización del perfil')
+    )
+    activo = models.BooleanField(
+        _('activo'),
+        default=True,
+        help_text=_('Indica si el repartidor está activo en el sistema')
+    )
     estado = models.CharField(
         _('estado'),
         max_length=20,

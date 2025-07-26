@@ -1,0 +1,125 @@
+{# Componente de paginación reutilizable #}
+
+{% if page_obj.paginator.num_pages > 1 %}
+<nav aria-label="Navegación de páginas">
+    <ul class="pagination justify-content-center mt-4">
+        {# Botón Anterior #}
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" 
+                   href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                   aria-label="Primera">
+                    <span aria-hidden="true">&laquo;&laquo;</span>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" 
+                   href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                   aria-label="Anterior">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link" aria-hidden="true">&laquo;&laquo;</span>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link" aria-hidden="true">&laquo;</span>
+            </li>
+        {% endif %}
+
+        {# Números de página #}
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <li class="page-item active" aria-current="page">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" 
+                       href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                        {{ num }}
+                    </a>
+                </li>
+            {% elif num == page_obj.number|add:'-3' or num == page_obj.number|add:'3' %}
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {# Botón Siguiente #}
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" 
+                   href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                   aria-label="Siguiente">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" 
+                   href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" 
+                   aria-label="Última">
+                    <span aria-hidden="true">&raquo;&raquo;</span>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span class="page-link" aria-hidden="true">&raquo;</span>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link" aria-hidden="true">&raquo;&raquo;</span>
+            </li>
+        {% endif %}
+    </ul>
+    
+    {# Información de la página actual #}
+    <div class="text-center text-muted small">
+        Mostrando {{ page_obj.start_index }}-{{ page_obj.end_index }} de {{ page_obj.paginator.count }} resultados
+    </div>
+</nav>
+{% endif %}
+
+{% block extra_js %}
+<script>
+// Script para mantener los parámetros de búsqueda en la paginación
+document.addEventListener('DOMContentLoaded', function() {
+    // Esta función ya no es necesaria ya que los enlaces ya manejan los parámetros GET
+    // Se mantiene por si se necesita funcionalidad adicional
+    
+    // Función para actualizar los enlaces de paginación con parámetros de búsqueda
+    function actualizarEnlacesPaginacion() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const parametros = {};
+        
+        // Obtener todos los parámetros de búsqueda excepto 'page'
+        for (const [key, value] of urlParams.entries()) {
+            if (key !== 'page') {
+                parametros[key] = value;
+            }
+        }
+        
+        // Actualizar los enlaces de paginación
+        document.querySelectorAll('.pagination a.page-link').forEach(link => {
+            const url = new URL(link.href);
+            const searchParams = new URLSearchParams(url.search);
+            
+            // Mantener los parámetros existentes
+            for (const [key, value] of Object.entries(parametros)) {
+                if (!searchParams.has(key)) {
+                    searchParams.append(key, value);
+                }
+            }
+            
+            // Actualizar la URL con los parámetros
+            url.search = searchParams.toString();
+            link.href = url.toString();
+        });
+    }
+    
+    // Llamar a la función cuando se cargue la página
+    actualizarEnlacesPaginacion();
+});
+</script>
+{% endblock %}

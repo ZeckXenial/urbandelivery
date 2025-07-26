@@ -1,0 +1,132 @@
+{# Componente de tarjeta de producto reutilizable #}
+
+<div class="card h-100 product-card">
+    {# Imagen del producto #}
+    <div class="position-relative">
+        <img src="{{ producto.img_producto|default:'/static/img/placeholder-product.jpg' }}" 
+             class="card-img-top" 
+             alt="{{ producto.nombre_producto }}"
+             style="height: 180px; object-fit: cover;">
+        
+        {# Badge de descuento (opcional) #}
+        {% if producto.descuento %}
+        <span class="position-absolute top-0 end-0 m-2 badge bg-danger">
+            -{{ producto.descuento }}%
+        </span>
+        {% endif %}
+    </div>
+    
+    <div class="card-body d-flex flex-column">
+        {# Categoría #}
+        {% if producto.nombre_categoria %}
+        <div class="mb-1">
+            <span class="badge bg-secondary">{{ producto.nombre_categoria }}</span>
+        </div>
+        {% endif %}
+        
+        {# Título y vendedor #}
+        <h5 class="card-title">{{ producto.nombre_producto }}</h5>
+        {% if producto.nombre_vendedor %}
+        <p class="text-muted small mb-2">
+            <i class="fas fa-store-alt me-1"></i> {{ producto.nombre_vendedor }}
+        </p>
+        {% endif %}
+        
+        {# Descripción (truncada) #}
+        <p class="card-text small text-muted flex-grow-1">
+            {{ producto.descripcion|truncatechars:100 }}
+        </p>
+        
+        <div class="mt-auto">
+            {# Precio y rating #}
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="mb-0 text-primary">
+                    ${{ producto.precio_producto|floatformat:2 }}
+                    {% if producto.precio_original %}
+                    <small class="text-muted text-decoration-line-through">
+                        ${{ producto.precio_original|floatformat:2 }}
+                    </small>
+                    {% endif %}
+                </h5>
+                
+                {# Rating #}
+                {% if producto.valoracion_promedio is not None %}
+                <div class="d-flex align-items-center">
+                    <span class="text-warning">
+                        <i class="fas fa-star"></i>
+                        {{ producto.valoracion_promedio|floatformat:1 }}
+                    </span>
+                    <span class="text-muted small ms-1">
+                        ({{ producto.total_valoraciones|default:0 }})
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+            
+            {# Stock #}
+            <div class="mb-3">
+                {% if producto.stock_producto > 0 %}
+                    {% if producto.stock_producto < 10 %}
+                    <span class="badge bg-warning text-dark">
+                        ¡Últimas {{ producto.stock_producto }} unidades!
+                    </span>
+                    {% else %}
+                    <span class="text-success small">
+                        <i class="fas fa-check-circle"></i> En stock
+                    </span>
+                    {% endif %}
+                {% else %}
+                    <span class="text-danger small">
+                        <i class="fas fa-times-circle"></i> Agotado
+                    </span>
+                {% endif %}
+            </div>
+            
+            {# Botones de acción #}
+            <div class="d-grid gap-2">
+                <a href="{% url 'producto_detalle' producto.id_producto %}" 
+                   class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-eye me-1"></i> Ver detalles
+                </a>
+                
+                {% if producto.stock_producto > 0 %}
+                <button class="btn btn-primary btn-sm btn-agregar-carrito" 
+                        data-producto-id="{{ producto.id_producto }}"
+                        data-producto-nombre="{{ producto.nombre_producto }}">
+                    <i class="fas fa-cart-plus me-1"></i> Añadir al carrito
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+// Script para manejar el botón de añadir al carrito
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.btn-agregar-carrito').forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.dataset.productoId;
+            const productName = this.dataset.productoNombre;
+            
+            // Aquí iría la lógica para añadir al carrito
+            console.log(`Añadiendo producto ${productId} al carrito`);
+            
+            // Mostrar notificación
+            const toast = new bootstrap.Toast(document.getElementById('toastCarrito'));
+            document.getElementById('toastCarritoMessage').textContent = 
+                `¡${productName} añadido al carrito!`;
+            toast.show();
+            
+            // Actualizar contador del carrito
+            const cartCount = document.querySelector('.cart-count');
+            if (cartCount) {
+                const currentCount = parseInt(cartCount.textContent) || 0;
+                cartCount.textContent = currentCount + 1;
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

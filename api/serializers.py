@@ -8,13 +8,11 @@ from django.utils import timezone
 # Usando el modelo de usuario por defecto de Django
 UserModel = get_user_model()
 
-# Comentando temporalmente los serializadores que dependen del modelo de usuario personalizado
-'''
 class UsuarioSerializer(serializers.ModelSerializer):
     """Serializador para el modelo Usuario."""
     class Meta:
         model = UserModel
-        fields = ('id', 'email', 'first_name', 'last_name')
+        fields = ('id', 'username', 'email', 'first_name', 'last_name')
         read_only_fields = ('id',)
 
 class UsuarioRegistroSerializer(serializers.ModelSerializer):
@@ -44,7 +42,6 @@ class UsuarioRegistroSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
-'''
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     """Serializador personalizado para la obtención de tokens JWT."""

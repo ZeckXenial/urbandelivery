@@ -2,17 +2,46 @@ from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator, MaxValueValidator
-# from usuarios.models import Usuario
+from django.utils import timezone
+from usuarios.models import Usuario
 
 
 class Vendedor(models.Model):
     """Modelo para vendedores que coincide con la tabla vendedor existente."""
+    
+    class EstadoVendedor(models.TextChoices):
+        ACTIVO = 'activo', _('Activo')
+        INACTIVO = 'inactivo', _('Inactivo')
+        SUSPENDIDO = 'suspendido', _('Suspendido')
+        PENDIENTE = 'pendiente', _('Pendiente de Aprobación')
+    
     id_vendedor = models.AutoField(primary_key=True)
+    id_usuario = models.OneToOneField(
+        Usuario,
+        on_delete=models.CASCADE,
+        related_name='vendedor_profile',
+        verbose_name=_('usuario'),
+        null=True,
+        blank=True,
+        db_column='id_usuario',
+        help_text=_('Usuario del sistema asociado a este vendedor')
+    )
     direccion_negocio = models.JSONField(
         _('dirección del negocio'),
-        help_text=_('Dirección del negocio en formato JSON')
+        help_text=_('Dirección del negocio en formato JSON'),
+        default=dict
     )
-    nombre_negocio = models.CharField(_('nombre del negocio'), max_length=100)
+    nombre_negocio = models.CharField(
+        _('nombre del negocio'),
+        max_length=100,
+        help_text=_('Nombre comercial del negocio')
+    )
+    descripcion_negocio = models.TextField(
+        _('descripción del negocio'),
+        null=True,
+        blank=True,
+        help_text=_('Descripción detallada del negocio y sus productos')
+    )
     img_negocio = models.TextField(
         _('imagen del negocio'),
         null=True,
@@ -23,16 +52,56 @@ class Vendedor(models.Model):
         _('teléfono del negocio'),
         max_length=20,
         null=True,
-        blank=True
+        blank=True,
+        help_text=_('Número de teléfono de contacto del negocio')
     )
-    # usuario = models.OneToOneField(
-    #     Usuario,
-    #     on_delete=models.CASCADE,
-    #     related_name='vendedor_profile',
-    #     verbose_name=_('usuario'),
-    #     null=True,
-    #     blank=True
-    # )
+    email_negocio = models.EmailField(
+        _('correo electrónico del negocio'),
+        null=True,
+        blank=True,
+        help_text=_('Correo electrónico de contacto del negocio')
+    )
+    horario_atencion = models.JSONField(
+        _('horario de atención'),
+        null=True,
+        blank=True,
+        help_text=_('Horario de atención en formato JSON')
+    )
+    estado = models.CharField(
+        _('estado'),
+        max_length=20,
+        choices=EstadoVendedor.choices,
+        default=EstadoVendedor.PENDIENTE,
+        help_text=_('Estado actual del vendedor en el sistema')
+    )
+    calificacion_promedio = models.DecimalField(
+        _('calificación promedio'),
+        max_digits=3,
+        decimal_places=2,
+        default=0.0,
+        validators=[MinValueValidator(0), MaxValueValidator(5)],
+        help_text=_('Calificación promedio basada en las valoraciones de los clientes')
+    )
+    total_valoraciones = models.PositiveIntegerField(
+        _('total de valoraciones'),
+        default=0,
+        help_text=_('Número total de valoraciones recibidas')
+    )
+    fecha_registro = models.DateTimeField(
+        _('fecha de registro'),
+        auto_now_add=True,
+        help_text=_('Fecha en que se registró el vendedor')
+    )
+    ultima_actualizacion = models.DateTimeField(
+        _('última actualización'),
+        auto_now=True,
+        help_text=_('Fecha de la última actualización del perfil')
+    )
+    activo = models.BooleanField(
+        _('activo'),
+        default=True,
+        help_text=_('Indica si el vendedor está activo en el sistema')
+    )
 
     class Meta:
         db_table = 'vendedor'

@@ -1,0 +1,170 @@
+{% extends 'clientes/base.html' %}
+{% load static %}
+
+{% block page_title %}Catálogo de Productos{% endblock %}
+
+{% block page_actions %}
+<div class="btn-group me-2">
+    <div class="input-group">
+        <form method="get" class="d-flex" id="search-form">
+            <input type="text" name="q" class="form-control" placeholder="Buscar productos..." value="{{ busqueda|default:'' }}">
+            <button class="btn btn-outline-secondary" type="submit">
+                <i class="fas fa-search"></i>
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block content_client %}
+<div class="row">
+    <!-- Filtros -->
+    <div class="col-md-3">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Filtros</h5>
+            </div>
+            <div class="card-body">
+                <form method="get">
+                    <!-- Categorías -->
+                    <div class="mb-4">
+                        <h6 class="mb-3">Categorías</h6>
+                        <div class="list-group list-group-flush">
+                            <a href="{% url 'clientes:catalogo' %}{% if busqueda %}?q={{ busqueda|urlencode }}{% endif %}" 
+                               class="list-group-item list-group-item-action {% if not request.GET.categoria %}active{% endif %}">
+                                Todas las categorías
+                            </a>
+                            {% for categoria in categorias %}
+                            <a href="{% url 'clientes:catalogo' %}?categoria={{ categoria.id }}{% if busqueda %}&q={{ busqueda|urlencode }}{% endif %}" 
+                               class="list-group-item list-group-item-action {% if request.GET.categoria|add:0 == categoria.id %}active{% endif %}">
+                                {{ categoria.nombre }}
+                                <span class="badge bg-secondary float-end">{{ categoria.num_productos }}</span>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <!-- Ordenar por -->
+                    <div class="mb-3">
+                        <h6 class="mb-3">Ordenar por</h6>
+                        <select name="orden" class="form-select" onchange="this.form.submit()">
+                            <option value="relevancia" {% if orden_actual == 'relevancia' %}selected{% endif %}>Relevancia</option>
+                            <option value="precio_asc" {% if orden_actual == 'precio_asc' %}selected{% endif %}>Precio: Menor a mayor</option>
+                            <option value="precio_desc" {% if orden_actual == 'precio_desc' %}selected{% endif %}>Precio: Mayor a menor</option>
+                            <option value="nuevos" {% if orden_actual == 'nuevos' %}selected{% endif %}>Más recientes</option>
+                            <option value="valoracion" {% if orden_actual == 'valoracion' %}selected{% endif %}>Mejor valorados</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">Aplicar Filtros</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Lista de productos -->
+    <div class="col-md-9">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">
+                {% if categoria_actual %}
+                    {{ categoria_actual.nombre }}
+                {% else %}
+                    Todos los productos
+                {% endif %}
+                <small class="text-muted">({{ page_obj.paginator.count }} resultados)</small>
+            </h4>
+        </div>
+        
+        {% if productos %}
+        <div class="row">
+            {% for producto in productos %}
+            <div class="col-md-4 mb-4">
+                {% include 'clientes/includes/tarjeta_producto.html' with producto=producto %}
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Paginación -->
+        {% if is_paginated %}
+        <nav aria-label="Navegación de productos">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Primera">
+                        <span aria-hidden="true">&laquo;&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Anterior">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }} <span class="visually-hidden">(actual)</span></span>
+                    </li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Siguiente">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Última">
+                        <span aria-hidden="true">&raquo;&raquo;</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+            <h4>No se encontraron productos</h4>
+            <p class="text-muted">Intenta con otros términos de búsqueda o ajusta los filtros.</p>
+            <a href="{% url 'clientes:catalogo' %}" class="btn btn-primary mt-3">
+                <i class="fas fa-undo me-2"></i>Limpiar filtros
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+    // Scripts específicos para el catálogo
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+        
+        // Manejar el formulario de búsqueda
+        const searchForm = document.getElementById('search-form');
+        if (searchForm) {
+            searchForm.addEventListener('submit', function(e) {
+                const searchInput = this.querySelector('input[name="q"]');
+                if (!searchInput.value.trim()) {
+                    e.preventDefault();
+                    window.location.href = '{% url 'clientes:catalogo' %}';
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

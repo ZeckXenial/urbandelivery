@@ -104,10 +104,15 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'urbanfood.urls'
 
+import os
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -222,10 +227,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Configuración de Crispy Forms
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
-
-# Configuración para MySQL
-# Asegura que los campos de texto largos funcionen correctamente
-DEFAULT_CHARSET = 'utf8mb4'
 
 # Tamaño máximo de conexión para MySQL
 # (ajusta según las necesidades de tu aplicación)

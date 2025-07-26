@@ -1,0 +1,146 @@
+{% extends 'clientes/base.html' %}
+{% load static %}
+
+{% block page_title %}{{ producto.nombre }}{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.0.0-beta.3/css/lightgallery-bundle.min.css">
+{% endblock %}
+
+{% block content_client %}
+<div class="row">
+    <!-- Galería de imágenes -->
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-body p-0">
+                <div class="lightgallery" style="width:100%;">
+                    <a href="{{ producto.imagen.url }}" class="d-block">
+                        <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="img-fluid w-100">
+                    </a>
+                </div>
+                {% if producto.imagen_adicional1 or producto.imagen_adicional2 %}
+                <div class="row g-0">
+                    {% if producto.imagen_adicional1 %}
+                    <div class="col-6">
+                        <a href="{{ producto.imagen_adicional1.url }}" class="d-block">
+                            <img src="{{ producto.imagen_adicional1.url }}" alt="{{ producto.nombre }}" class="img-fluid">
+                        </a>
+                    </div>
+                    {% endif %}
+                    {% if producto.imagen_adicional2 %}
+                    <div class="col-6">
+                        <a href="{{ producto.imagen_adicional2.url }}" class="d-block">
+                            <img src="{{ producto.imagen_adicional2.url }}" alt="{{ producto.nombre }}" class="img-fluid">
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Información del producto -->
+    <div class="col-lg-6">
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h1 class="h3 mb-1">{{ producto.nombre }}</h1>
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="text-warning me-2">
+                                {% for i in "12345"|make_list %}
+                                    {% if forloop.counter <= valoracion_promedio|floornum %}
+                                        <i class="fas fa-star"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <small class="text-muted">({{ valoraciones|length }} reseñas)</small>
+                        </div>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" 
+                                data-bs-toggle="tooltip" data-bs-placement="left" 
+                                title="{% if en_favoritos %}Eliminar de favoritos{% else %}Agregar a favoritos{% endif %}"
+                                onclick="toggleFavorito({{ producto.id }})">
+                            <i class="{% if en_favoritos %}fas{% else %}far{% endif %} fa-heart"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h3 class="text-primary mb-0">${{ producto.precio|floatformat:2 }}</h3>
+                    {% if producto.precio_anterior > 0 %}
+                    <small class="text-muted text-decoration-line-through">${{ producto.precio_anterior|floatformat:2 }}</small>
+                    <span class="badge bg-danger ms-2">
+                        {{ producto.descuento|floatformat:0 }}% OFF
+                    </span>
+                    {% endif %}
+                </div>
+                
+                <p class="mb-4">{{ producto.descripcion_larga|default:producto.descripcion|linebreaksbr }}</p>
+                
+                <div class="mb-4">
+                    <h6 class="mb-2">Disponibilidad:</h6>
+                    {% if producto.stock > 0 %}
+                    <span class="badge bg-success">
+                        <i class="fas fa-check-circle me-1"></i> En stock ({{ producto.stock }} disponibles)
+                    </span>
+                    {% else %}
+                    <span class="badge bg-danger">
+                        <i class="fas fa-times-circle me-1"></i> Sin stock
+                    </span>
+                    {% endif %}
+                </div>
+                
+                <div class="mb-4">
+                    <h6 class="mb-2">Vendedor:</h6>
+                    <div class="d-flex align-items-center">
+                        <img src="{{ producto.vendedor.usuario.foto_perfil.url|default:'/media/default.png' }}" 
+                             alt="{{ producto.vendedor.nombre_negocio }}" 
+                             class="rounded-circle me-2" width="40" height="40">
+                        <div>
+                            <div class="fw-bold">{{ producto.vendedor.nombre_negocio }}</div>
+                            <div class="text-muted small">
+                                {% if producto.vendedor.tiempo_entrega %}
+                                    {{ producto.vendedor.tiempo_entrega }} • 
+                                {% endif %}
+                                {{ producto.vendedor.calificacion|default:5|floatformat:1 }} <i class="fas fa-star text-warning"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <form action="{% url 'clientes:agregar_al_carrito' producto.id %}" method="post" class="mb-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="cantidad" class="form-label">Cantidad</label>
+                            <input type="number" class="form-control" id="cantidad" name="cantidad" 
+                                   value="1" min="1" max="{% if producto.stock > 0 %}{{ producto.stock }}{% else %}0{% endif %}">
+                        </div>
+                        <div class="col-md-9 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100" {% if producto.stock <= 0 %}disabled{% endif %}>
+                                <i class="fas fa-shopping-cart me-2"></i>
+                                {% if producto.stock > 0 %}Agregar al carrito{% else %}Sin stock{% endif %}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                
+                <div class="d-flex">
+                    <button class="btn btn-outline-secondary me-2" data-bs-toggle="modal" data-bs-target="#compartirModal">
+                        <i class="fas fa-share-alt me-1"></i> Compartir
+                    </button>
+                    <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#reportarModal">
+                        <i class="fas fa-flag me-1"></i> Reportar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

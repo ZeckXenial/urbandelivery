@@ -14,20 +14,20 @@ from .serializers import (
 # from usuarios.models import Usuario  # Comentado temporalmente
 
 
-# class UsuarioRegistroView(generics.CreateAPIView):
-#     """Vista para el registro de nuevos usuarios."""
-#     serializer_class = UsuarioRegistroSerializer
-#     permission_classes = [permissions.AllowAny]
+class UsuarioRegistroView(generics.CreateAPIView):
+    """Vista para el registro de nuevos usuarios."""
+    serializer_class = UsuarioRegistroSerializer
+    permission_classes = [permissions.AllowAny]
     
-#     def post(self, request, *args, **kwargs):
-#         serializer = self.get_serializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         user = serializer.save()
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
         
-#         return Response({
-#             'message': 'Usuario registrado exitosamente',
-#             'user': UsuarioSerializer(user).data
-#         }, status=status.HTTP_201_CREATED)
+        return Response({
+            'message': 'Usuario registrado exitosamente',
+            'user': UsuarioSerializer(user).data
+        }, status=status.HTTP_201_CREATED)
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):

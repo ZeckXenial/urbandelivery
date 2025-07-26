@@ -1,7 +1,8 @@
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
-# from usuarios.models import Usuario  # Comentado temporalmente
+from django.utils import timezone
+from usuarios.models import Usuario
 
 
 class Cliente(models.Model):
@@ -10,19 +11,62 @@ class Cliente(models.Model):
     nombre_cliente = models.CharField(_('nombre'), max_length=50)
     apellido_cliente = models.CharField(_('apellido'), max_length=50)
     email_cliente = models.EmailField(_('correo electrónico'), unique=True)
-    two_factor_auth = models.CharField(_('código 2FA'), max_length=255, null=True, blank=True)
-    # usuario = models.OneToOneField(
-    #     Usuario,
-    #     on_delete=models.CASCADE,
-    #     related_name='cliente_profile',
-    #     verbose_name=_('usuario'),
-    #     null=True,
-    #     blank=True
-    # )
-    telefono = models.CharField(_('teléfono'), max_length=20, null=True, blank=True)
-    direccion_entrega = models.JSONField(_('dirección de entrega'), null=True, blank=True)
-    horario_atencion = models.TextField(_('horario de atención'), null=True, blank=True)
-    puntos_fidelidad = models.IntegerField(_('puntos de fidelidad'), default=0)
+    two_factor_auth = models.CharField(
+        _('código 2FA'),
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text=_('Código de autenticación de dos factores')
+    )
+    id_usuario = models.OneToOneField(
+        Usuario,
+        on_delete=models.CASCADE,
+        related_name='cliente_profile',
+        verbose_name=_('usuario'),
+        null=True,
+        blank=True,
+        db_column='id_usuario',
+        help_text=_('Usuario del sistema asociado a este cliente')
+    )
+    telefono = models.CharField(
+        _('teléfono'),
+        max_length=20,
+        null=True,
+        blank=True,
+        help_text=_('Número de teléfono de contacto')
+    )
+    direccion_entrega = models.JSONField(
+        _('dirección de entrega'),
+        null=True,
+        blank=True,
+        help_text=_('Direcciones de entrega en formato JSON')
+    )
+    horario_atencion = models.TextField(
+        _('horario de atención'),
+        null=True,
+        blank=True,
+        help_text=_('Horario preferido de atención')
+    )
+    puntos_fidelidad = models.IntegerField(
+        _('puntos de fidelidad'),
+        default=0,
+        help_text=_('Puntos acumulados en el programa de fidelización')
+    )
+    fecha_registro = models.DateTimeField(
+        _('fecha de registro'),
+        auto_now_add=True,
+        help_text=_('Fecha en que se registró el cliente')
+    )
+    ultima_actualizacion = models.DateTimeField(
+        _('última actualización'),
+        auto_now=True,
+        help_text=_('Fecha de la última actualización del perfil')
+    )
+    activo = models.BooleanField(
+        _('activo'),
+        default=True,
+        help_text=_('Indica si el cliente está activo en el sistema')
+    )
 
     class Meta:
         db_table = 'clientes'
